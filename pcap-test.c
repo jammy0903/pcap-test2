@@ -1,65 +1,129 @@
 #include <pcap.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
-#include <net/ethernet.h>
+#include <netinet/if_ether.h>
+#include <netinet/ether.h>
 #include <netinet/ip.h>
+#include <netinet/tcp.h>
 
-// IPv6 헤더 구조체 정의
-struct libnet_ipv6_hdr
+
+
+#ifndef ETHERTYPE_IP
+#define ETHERTYPE_IP            0x0800  /* IP protocol */
+#endif
+
+struct libnet_ipv4_hdr
+
+
+struct libnet_ipv4_hdr
 {
-    u_int8_t ip_flags;     /* version, traffic class, flow label */
+#if (LIBNET_LIL_ENDIAN)
+    u_int8_t ip_hl:4,      /* header length */
+        ip_v:4;         /* version */
+#endif
+#if (LIBNET_BIG_ENDIAN)
+    u_int8_t ip_v:4,       /* version */
+        ip_hl:4;        /* header length */
+#endif
+    u_int8_t ip_tos;       /* type of service */
+#ifndef IPTOS_LOWDELAY
+#define IPTOS_LOWDELAY      0x10
+#endif
+#ifndef IPTOS_THROUGHPUT
+#define IPTOS_THROUGHPUT    0x08
+#endif
+#ifndef IPTOS_RELIABILITY
+#define IPTOS_RELIABILITY   0x04
+#endif
+#ifndef IPTOS_LOWCOST
+#define IPTOS_LOWCOST       0x02
+#endif
     u_int16_t ip_len;         /* total length */
-    u_int8_t ip_nh;           /* next header */
-    u_int8_t ip_hl;           /* hop limit */
-    struct libnet_in6_addr ip_src;
-    struct libnet_in6_addr ip_dst; /* source and dest address */
-
-};
-struct libnet_ipv6_frag_hdr
-{
-    u_int8_t ip_nh;          /* next header */
-    u_int8_t ip_reserved;    /* reserved */
-    u_int16_t ip_frag;       /* fragmentation stuff */
-    u_int32_t ip_id;         /* id */
-};
-struct libnet_ipv6_routing_hdr
-{
-    u_int8_t ip_nh;          /* next header */
-    u_int8_t ip_len;         /* length of header in 8 octet units (sans 1st) */
-    u_int8_t ip_rtype;       /* routing type */
-    u_int8_t ip_segments;    /* segments left */
-    /* routing information allocated dynamically */
-};
-struct libnet_ipv6_destopts_hdr
-{
-    u_int8_t ip_nh;          /* next header */
-    u_int8_t ip_len;         /* length of header in 8 octet units (sans 1st) */
-    /* destination options information allocated dynamically */
-};
-struct libnet_ipv6_hbhopts_hdr
-{
-    u_int8_t ip_nh;          /* next header */
-    u_int8_t ip_len;         /* length of header in 8 octet units (sans 1st) */
-    /* destination options information allocated dynamically */
+    u_int16_t ip_id;          /* identification */
+    u_int16_t ip_off;
+#ifndef IP_RF
+#define IP_RF 0x8000        /* reserved fragment flag */
+#endif
+#ifndef IP_DF
+#define IP_DF 0x4000        /* dont fragment flag */
+#endif
+#ifndef IP_MF
+#define IP_MF 0x2000        /* more fragments flag */
+#endif
+#ifndef IP_OFFMASK
+#define IP_OFFMASK 0x1fff   /* mask for fragmenting bits */
+#endif
+    u_int8_t ip_ttl;          /* time to live */
+    u_int8_t ip_p;            /* protocol */
+    u_int16_t ip_sum;         /* checksum */
+    struct in_addr ip_src, ip_dst; /* source and dest address */
 };
 
 
-//TCP 세그먼트 소스주소 & 목적지 주소 
-struct tcp_hdr {
-	u_int8_t src_port; //src port 16비트
-	u_int8_t dst_port; // dst port 16비트
-	u_int8_t seq_num; //시퀀스 번호 [32]
-	u_int8_t ACK_num;//승인번호[32]
-	int data_offset;
-	int reserved;
-	u_int8_t flag;
-	u_int8_t win;
-	u_int8_t checksum;
-	u_int8_t urgent;
-	
-}
+
+
+
+
+
+          
+struct libnet_ethernet_hdr
+{
+    u_int8_t  ether_dhost[ETHER_ADDR_LEN];/* destination ethernet address */
+    u_int8_t  ether_shost[ETHER_ADDR_LEN];/* source ethernet address */
+    u_int16_t ether_type;                 /* protocol */
+};
+struct libnet_tcp_hdr
+{
+    u_int16_t th_sport;       /* source port */
+    u_int16_t th_dport;       /* destination port */
+    u_int32_t th_seq;          /* sequence number */
+    u_int32_t th_ack;          /* acknowledgement number */
+#if (LIBNET_LIL_ENDIAN)
+    u_int8_t th_x2:4,         /* (unused) */
+           th_off:4;        /* data offset */
+#endif
+#if (LIBNET_BIG_ENDIAN)
+    u_int8_t th_off:4,        /* data offset */
+           th_x2:4;         /* (unused) */
+#endif
+    u_int8_t  th_flags;       /* control flags */
+#ifndef TH_FIN
+#define TH_FIN    0x01      /* finished send data */
+#endif
+#ifndef TH_SYN
+#define TH_SYN    0x02      /* synchronize sequence numbers */
+#endif
+#ifndef TH_RST
+#define TH_RST    0x04      /* reset the connection */
+#endif
+#ifndef TH_PUSH
+#define TH_PUSH   0x08      /* push data to the app layer */
+#endif
+#ifndef TH_ACK
+#define TH_ACK    0x10      /* acknowledge */
+#endif
+#ifndef TH_URG
+#define TH_URG    0x20      /* urgent! */
+#endif
+#ifndef TH_ECE
+#define TH_ECE    0x40
+#endif
+#ifndef TH_CWR   
+#define TH_CWR    0x80
+#endif
+    u_int16_t th_win;    
+
+
+
+    struct ether_header *eth_h;
+struct tcphdr *tcp_h;
+struct ip *ip_h;
+
+
+
+
+
 
 
 
@@ -87,7 +151,7 @@ bool parse(Param* param, int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
-	printf("It's work!");
+
 	if (!parse(&param, argc, argv))
 		return -1;
 
