@@ -1,10 +1,10 @@
 #include <pcap.h>
 #include <stdbool.h>
 #include <stdio.h>
-//#include <netinet/in.h>
-//#include <arpa/inet.h>
-//#include <net/ethernet.h>
-//#include <netinet/ip.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <net/ethernet.h>
+#include <netinet/ip.h>
 
 // IPv6 헤더 구조체 정의
 struct libnet_ipv6_hdr
@@ -13,7 +13,8 @@ struct libnet_ipv6_hdr
     u_int16_t ip_len;         /* total length */
     u_int8_t ip_nh;           /* next header */
     u_int8_t ip_hl;           /* hop limit */
-    struct libnet_in6_addr ip_src, ip_dst; /* source and dest address */
+    struct libnet_in6_addr ip_src;
+    struct libnet_in6_addr ip_dst; /* source and dest address */
 
 };
 struct libnet_ipv6_frag_hdr
