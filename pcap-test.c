@@ -13,8 +13,6 @@
 #define ETHERTYPE_IP            0x0800  /* IP protocol */
 #endif
 
-struct libnet_ipv4_hdr
-
 
 struct libnet_ipv4_hdr
 {
@@ -59,12 +57,6 @@ struct libnet_ipv4_hdr
     u_int16_t ip_sum;         /* checksum */
     struct in_addr ip_src, ip_dst; /* source and dest address */
 };
-
-
-
-
-
-
 
           
 struct libnet_ethernet_hdr
@@ -113,10 +105,10 @@ struct libnet_tcp_hdr
 #define TH_CWR    0x80
 #endif
     u_int16_t th_win;    
+};
 
 
-
-    struct ether_header *eth_h;
+struct ether_header *eth_h;
 struct tcphdr *tcp_h;
 struct ip *ip_h;
 
