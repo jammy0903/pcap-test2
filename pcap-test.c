@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
 			printf("pcap_next_ex return %d(%s)\n", res, pcap_geterr(pcap));
 			break;
 		}
-		printf("%u bytes captured\n", header->caplen);
+        //printf("%u bytes captured\n", header->caplen);
 
         /*  이더넷 패킷헤더 포인터 가리키기
                     이더넷 길이는 정해져있으므로 구할 필요 x
@@ -75,14 +75,32 @@ int main(int argc, char* argv[]) {
 
            eth_hdr= (struct ether_header*)packet; //pkt chg into header's ptr
            ip_hdr = (struct ip*)(packet + sizeof(struct ether_header));
-          //u_int8_t ip_p= ip_hdr->ip_hl*4; //ip's length must be byte!!
-           tcp_hdr= (struct tcphdr*)(packet +sizeof(struct ip));
+           tcp_hdr = (struct tcphdr*)(packet + sizeof(struct ether_header) + (ip_hdr->ip_hl * 4));
+
+
 
            if (ntohs(eth_hdr->ether_type) != ETHERTYPE_IP) continue;
-             printf("type = %04x \n", ntohs(eth_hdr->ether_type));
 
-           if (ip_hdr->ip_p != IPPROTO_TCP) continue;
-             printf("proto = %d \n", ip_hdr->ip_p);
+           if (ip_hdr->ip_p == IPPROTO_TCP){
+               printf("ETH Header's SRC addr = %s \n", ether_ntoa((struct ether_addr *)eth_hdr->ether_shost));
+               printf("ETH Header's DST addr = %s \n", ether_ntoa((struct ether_addr *)eth_hdr->ether_dhost));
+
+               printf("IP Header's SRC ADDR = %s \n", inet_ntoa(ip_hdr->ip_src));
+               printf("IP Header's DST ADDR = %s \n", inet_ntoa(ip_hdr->ip_dst));
+
+               printf("TCP Header's SRC PORT = %d \n", ntohs(tcp_hdr->th_sport));
+               printf("TCP Header's DST PORT = %d \n", ntohs(tcp_hdr->th_dport));
+
+               uint32_t hdr_len = (ip_hdr->ip_hl*4) + (tcp_hdr->th_off*4);
+              const u_char* payload_ptr = packet + hdr_len;
+
+                   for(int i=0; i < 10;i++){
+                       printf("%02x ", payload_ptr[i]);
+                       printf("\n");
+
+                   }
+
+            }else  {continue;}
 
 	}
 
