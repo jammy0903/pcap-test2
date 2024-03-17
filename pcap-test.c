@@ -11,11 +11,6 @@ struct ether_header *eth_hdr;
 struct tcphdr *tcp_hdr;
 struct ip *ip_hdr;
 
-//tcp header start as 08 00
-#define TCP
-
-
-
 
 void usage() {
 	printf("syntax: pcap-test <interface>\n");
@@ -80,11 +75,15 @@ int main(int argc, char* argv[]) {
 
            eth_hdr= (struct ether_header*)packet; //pkt chg into header's ptr
            ip_hdr = (struct ip*)(packet + sizeof(struct ether_header));
+          //u_int8_t ip_p= ip_hdr->ip_hl*4; //ip's length must be byte!!
            tcp_hdr= (struct tcphdr*)(packet +sizeof(struct ip));
 
-           if (ip_hdr->ip_p == IPPROTO_TCP) {
-               printf("ethernet header SRC MAC address : %s \n", ether_ntoa((const struct ether_addr*)eth_hdr->ether_shost));
-           }else{continue;}
+           if (ntohs(eth_hdr->ether_type) != ETHERTYPE_IP) continue;
+             printf("type = %04x \n", ntohs(eth_hdr->ether_type));
+
+           if (ip_hdr->ip_p != IPPROTO_TCP) continue;
+             printf("proto = %d \n", ip_hdr->ip_p);
+
 	}
 
 	pcap_close(pcap);
